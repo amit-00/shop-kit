@@ -13,7 +13,7 @@ function Product({
 
     const handleAddToCart = () => {
         cart.addItem(product, quantity)
-        setQuantity(1) // Reset quantity after adding to cart
+        setQuantity(1)
     }
 
     return (

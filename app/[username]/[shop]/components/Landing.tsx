@@ -41,24 +41,21 @@ function Landing(
 
                 {/* Social Links */}
                 <div className="flex justify-center space-x-4 mb-8">
-                    <Link href={socialLinks.facebook}>
-                        <Button variant="outline" size="sm">
+                    
+                    <Button asChild variant="outline" size="sm">
                         <Facebook className="h-4 w-4 mr-2" />
-                        Facebook
-                        </Button>
-                    </Link>
-                    <Link href={socialLinks.twitter}>
-                        <Button variant="outline" size="sm">
+                        <Link href={socialLinks.facebook}>Facebook</Link>
+                    </Button>
+                    
+                    <Button asChild variant="outline" size="sm">
                         <Twitter className="h-4 w-4 mr-2" />
-                        Twitter
-                        </Button>
-                    </Link>
-                    <Link href={socialLinks.instagram}>
-                        <Button variant="outline" size="sm">
+                        <Link href={socialLinks.twitter}>Twitter</Link>
+                    </Button>
+                    
+                    <Button asChild variant="outline" size="sm">
                         <Instagram className="h-4 w-4 mr-2" />
-                        Instagram
-                        </Button>
-                    </Link>
+                        <Link href={socialLinks.instagram}>Instagram</Link>
+                    </Button>
                 </div>
             </div>
         </section>
