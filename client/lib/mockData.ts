@@ -1,4 +1,5 @@
 import { Catalog } from '@/types/catalog';
+import { FAQ } from '@/types/faq';
 
 const catalogsArray: Catalog[] = [
   {
@@ -155,4 +156,28 @@ export const mockCatalogs: Record<string, Catalog> = catalogsArray.reduce(
   },
   {} as Record<string, Catalog>
 );
+
+// Mock FAQ data
+export const mockFAQs: FAQ[] = [
+  {
+    title: 'What is your return policy?',
+    content: 'We offer a 30-day return policy on all items. Items must be in their original condition with tags attached. Please contact our customer service team to initiate a return.',
+  },
+  {
+    title: 'How long does shipping take?',
+    content: 'Standard shipping typically takes 5-7 business days. Express shipping options are available at checkout for 2-3 business day delivery.',
+  },
+  {
+    title: 'Do you offer international shipping?',
+    content: 'Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by location. Please check the shipping options at checkout for your specific country.',
+  },
+  {
+    title: 'What payment methods do you accept?',
+    content: 'We accept all major credit cards, PayPal, Apple Pay, and Google Pay. All transactions are secured with SSL encryption.',
+  },
+  {
+    title: 'Can I track my order?',
+    content: 'Yes, once your order ships, you will receive a tracking number via email. You can use this number to track your package in real-time on our website or the carrier\'s website.',
+  },
+];
 

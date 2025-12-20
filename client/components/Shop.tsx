@@ -99,7 +99,7 @@ export default function Shop({ catalogs }: ShopProps) {
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu bg-base-100 border border-base-300 shadow-lg rounded-lg w-52 mt-2 z-10"
+                className="dropdown-content menu bg-base-100 border border-base-300 shadow-lg rounded-lg w-[200px] mt-2 z-10"
               >
                 {catalogIds.map((catalogId) => {
                   const catalog = catalogs[catalogId];
@@ -158,7 +158,7 @@ export default function Shop({ catalogs }: ShopProps) {
             </div>
             <ul
               tabIndex={0}
-              className="dropdown-content menu bg-base-100 border border-base-300 shadow-lg rounded-lg w-52 mt-2 z-10"
+              className="dropdown-content menu bg-base-100 border border-base-300 shadow-lg rounded-lg w-[200px] mt-2 z-10"
             >
               <li>
                 <button
