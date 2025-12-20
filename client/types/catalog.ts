@@ -5,6 +5,3 @@ export interface Catalog {
   name: string;
   products: Product[];
 }
-
-
-
