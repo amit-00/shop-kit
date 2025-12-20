@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: all;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Theme-aware rounding utility using DaisyUI's --radius-box variable */
+.radius-theme {
+  border-radius: var(--radius-box);
+}
