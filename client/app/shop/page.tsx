@@ -8,6 +8,7 @@ import { mockCatalogs, mockFAQs } from '@/lib/mockData';
 import Hero from '@/components/Hero';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import FAQ from '@/components/FAQ';
+import ShopPageClient from '@/components/ShopPageClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +20,7 @@ export default async function ShopPage() {
   const config = await getTenantConfig(tenant);
 
   return (
-    <>
+    <ShopPageClient>
       <Cart />
       <Header name={config.name.toUpperCase()} />
       <main>
@@ -29,6 +30,6 @@ export default async function ShopPage() {
         <Shop catalogs={mockCatalogs} />
         <FAQ faqs={mockFAQs} />
       </main>
-    </>
+    </ShopPageClient>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Product } from '@/types/product';
+import { useProduct } from '@/stores/productStore';
 
 interface ProductItemProps {
   product: Product;
@@ -10,6 +11,7 @@ interface ProductItemProps {
 
 export default function ProductItem({ product }: ProductItemProps) {
   const [colorMode, setColorMode] = useState(false);
+  const { setActiveProduct } = useProduct();
 
   useEffect(() => {
     // Check for color-mode attribute on html element
@@ -31,6 +33,10 @@ export default function ProductItem({ product }: ProductItemProps) {
     return () => observer.disconnect();
   }, []);
 
+  const handleClick = () => {
+    setActiveProduct(product);
+  };
+
   return (
     <div
       className={`flex flex-col group cursor-pointer transition-all duration-300 ${
@@ -38,6 +44,7 @@ export default function ProductItem({ product }: ProductItemProps) {
           ? 'hover:bg-secondary hover:border-2 hover:border-accent radius-theme p-4 border-2 border-transparent'
           : 'hover:border-2 hover:border-base-300 radius-theme p-4 border-2 border-transparent'
       }`}
+      onClick={handleClick}
     >
       <div className="relative w-full aspect-square mb-4 overflow-hidden radius-theme bg-base-200">
         <Image
