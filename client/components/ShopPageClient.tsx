@@ -1,14 +1,23 @@
 'use client';
 
 import { ProductProvider } from '../stores/productStore';
+import { CartProvider } from '../stores/cartStore';
 import ProductDetails from './ProductDetails';
 
-export default function ShopPageClient({ children }: { children: React.ReactNode }) {
+export default function ShopPageClient({ 
+  children, 
+  shopSlug 
+}: { 
+  children: React.ReactNode;
+  shopSlug: string;
+}) {
   return (
-    <ProductProvider>
-      {children}
-      <ProductDetails />
-    </ProductProvider>
+    <CartProvider shopSlug={shopSlug}>
+      <ProductProvider>
+        {children}
+        <ProductDetails />
+      </ProductProvider>
+    </CartProvider>
   );
 }
 

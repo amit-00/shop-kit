@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { CartProvider } from "../stores/cartStore";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,11 +12,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="light" data-color-mode="false">
+    <html lang="en" data-theme="corporate" data-color-mode="false">
       <body className="antialiased bg-base-100">
-        <CartProvider>
-          {children}
-        </CartProvider>
+        {children}
       </body>
     </html>
   );

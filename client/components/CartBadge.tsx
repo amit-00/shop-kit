@@ -33,9 +33,9 @@ export default function CartBadge() {
       {showBadge && (
         <>
           {showDot && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-base-content rounded-full"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
           )}
-          <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-base-content text-base-100 text-xs font-bold rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-secondary text-secondary-content text-xs font-bold rounded-full flex items-center justify-center">
             {displayCount}
           </span>
         </>

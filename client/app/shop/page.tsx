@@ -20,7 +20,7 @@ export default async function ShopPage() {
   const config = await getTenantConfig(tenant);
 
   return (
-    <ShopPageClient>
+    <ShopPageClient shopSlug={tenant}>
       <Cart />
       <Header name={config.name.toUpperCase()} />
       <main>
