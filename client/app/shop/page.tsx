@@ -25,7 +25,7 @@ export default async function ShopPage() {
       <Header name={config.name.toUpperCase()} />
       <main>
         <Hero />
-        <FeaturedProducts products={mockCatalogs['featured']?.products.slice(0, 4)} name="Featured" />
+        <FeaturedProducts products={mockCatalogs['featured']?.products} name="Featured" />
         <FeaturedProducts products={mockCatalogs['featured']?.products.slice(0, 4)} name="Popular" />
         <Shop catalogs={mockCatalogs} />
         <FAQ faqs={mockFAQs} />
