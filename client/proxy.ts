@@ -1,53 +1,76 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from 'next/server';
+import { rootDomain } from '@/lib/utils';
 
-export function proxy(request: NextRequest) {
-  // Extract subdomain from the hostname
-  const hostname = request.headers.get("host") || request.nextUrl.hostname;
-  const subdomain = extractSubdomain(hostname);
+export default function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const subdomain = extractSubdomain(request);
 
-  const requestHeaders = new Headers(request.headers);
   if (subdomain) {
-    requestHeaders.set("x-tenant-id", subdomain);
+    // Block access to admin page from subdomains
+    if (pathname.startsWith('/admin')) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // For the root path on a subdomain, rewrite to the subdomain page
+    if (pathname === '/') {
+      const redirectUrl = new URL(`/s/${subdomain}`, request.url);
+      console.log('redirectUrl', redirectUrl);
+      return NextResponse.rewrite(redirectUrl);
+    }
   }
 
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
-
-  // Optionally, you can also set it as a response header
-  if (subdomain) {
-    response.headers.set("x-subdomain", subdomain);
-  }
-
-  return response;
+  // On the root domain, allow normal access
+  return NextResponse.next();
 }
 
 
-function extractSubdomain(hostname: string): string | null {
-  const hostWithoutPort = hostname.split(":")[0];
+function extractSubdomain(request: NextRequest): string | null {
+  const url = request.url;
+  const host = request.headers.get('host') || '';
+  const hostname = host.split(':')[0];
 
-  const parts = hostWithoutPort.split(".");
+  // Local development environment
+  if (url.includes('localhost') || url.includes('127.0.0.1')) {
+    // Try to extract subdomain from the full URL
+    const fullUrlMatch = url.match(/http:\/\/([^.]+)\.localhost/);
+    if (fullUrlMatch && fullUrlMatch[1]) {
+      return fullUrlMatch[1];
+    }
 
-  if (parts.length >= 3 && !isLocalhost(hostWithoutPort) && !isIPAddress(hostWithoutPort)) {
-    return parts[0];
+    // Fallback to host header approach
+    if (hostname.includes('.localhost')) {
+      return hostname.split('.')[0];
+    }
+
+    return null;
   }
 
-  // For localhost or IP addresses, return minimal for development
-  return "minimal";
-}
+  // Production environment
+  const rootDomainFormatted = rootDomain.split(':')[0];
 
-function isLocalhost(hostname: string): boolean {
-  return hostname === "localhost" || hostname.startsWith("127.0.0.1") || hostname.startsWith("0.0.0.0");
-}
+  // Handle preview deployment URLs (tenant---branch-name.vercel.app)
+  if (hostname.includes('---') && hostname.endsWith('.vercel.app')) {
+    const parts = hostname.split('---');
+    return parts.length > 0 ? parts[0] : null;
+  }
 
-function isIPAddress(hostname: string): boolean {
-  // Simple check for IPv4
-  const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  return ipv4Regex.test(hostname);
+  // Regular subdomain detection
+  const isSubdomain =
+    hostname !== rootDomainFormatted &&
+    hostname !== `www.${rootDomainFormatted}` &&
+    hostname.endsWith(`.${rootDomainFormatted}`);
+
+  return isSubdomain ? hostname.replace(`.${rootDomainFormatted}`, '') : null;
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all paths except for:
+     * 1. /api routes
+     * 2. /_next (Next.js internals)
+     * 3. all root files inside /public (e.g. /favicon.ico)
+     */
+    '/((?!api|_next|[\\w-]+\\.\\w+).*)'
+  ]
 };

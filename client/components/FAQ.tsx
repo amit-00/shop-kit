@@ -11,8 +11,8 @@ export default function FAQ({ faqs }: FAQProps) {
   }
 
   return (
-    <section className="min-h-[400px] bg-base-100 px-4 py-16">
-      <div className="max-w-6xl mx-auto">
+    <section className="min-h-[400px] bg-base-100 py-16">
+      <div className="max-w-7xl mx-auto px-8 md:px-4">
         <h2 className="text-4xl md:text-5xl font-semibold text-base-content uppercase tracking-tight mb-12">
           FAQ
         </h2>

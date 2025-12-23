@@ -64,8 +64,8 @@ export default function Shop({ catalogs }: ShopProps) {
   }, [productsWithSearchText, debouncedQuery, sortBy]);
 
   return (
-    <section className="min-h-[600px] bg-base-100 px-4 py-16">
-      <div className="max-w-6xl mx-auto">
+    <section className="min-h-[600px] bg-base-100 py-16">
+      <div className="max-w-7xl mx-auto px-8 md:px-4">
         {/* Catalog Selector and Search Bar */}
         <h2 className="text-4xl md:text-5xl font-semibold text-base-content uppercase tracking-tight mb-12">
           Shop

@@ -19,13 +19,13 @@ export default function Header({ name }: { name: string }) {
 
   return (
     <header
-      className={`sticky top-2 md:top-4 z-30 max-w-6xl mx-auto bg-base-100/50 backdrop-blur-md py-4 rounded-box transition-all duration-300 ease-in-out ${
-        isScrolled ? 'border border-base-300 shadow-sm' : 'border-transparent'
+      className={`sticky top-2 md:top-4 z-30 max-w-7xl mx-auto bg-base-100/50 backdrop-blur-md py-4 rounded-box transition-all duration-300 ease-in-out ${
+        isScrolled ? 'shadow-sm' : ''
       }`}
     >
       <div className="px-8 md:px-4 flex items-center justify-between">
         <div className="font-semibold text-2xl text-base-content uppercase tracking-wide">
-          MINIMAL
+          {name.toUpperCase()}
         </div>
         <div className="flex gap-4 items-center">
           <CartBadge />

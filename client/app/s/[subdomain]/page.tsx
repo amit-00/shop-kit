@@ -1,6 +1,4 @@
-import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
-import { getTenantConfig } from '@/lib/utils';
+import { getShopConfig } from '@/lib/utils';
 import Header from '@/components/Header';
 import Shop from '@/components/Shop';
 import Cart from '@/components/Cart';
@@ -12,17 +10,14 @@ import ShopPageClient from '@/components/ShopPageClient';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ShopPage() {
-  const tenant = (await headers()).get("x-tenant-id");
-
-  if (!tenant) notFound();
-
-  const config = await getTenantConfig(tenant);
+export default async function ShopPage({ params }: { params: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const subdomain = (await params).subdomain;
+  const config = await getShopConfig(subdomain as string);
 
   return (
-    <ShopPageClient shopSlug={tenant}>
+    <>
       <Cart />
-      <Header name={config.name.toUpperCase()} />
+      <Header name={config.name} />
       <main>
         <Hero />
         <FeaturedProducts products={mockCatalogs['featured']?.products} name="Featured" />
@@ -30,6 +25,6 @@ export default async function ShopPage() {
         <Shop catalogs={mockCatalogs} />
         <FAQ faqs={mockFAQs} />
       </main>
-    </ShopPageClient>
+    </>
   );
 }

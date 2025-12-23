@@ -1,11 +1,11 @@
 @import "tailwindcss";
-
-html {
-  scroll-behavior: smooth;
+@plugin "daisyui" {
+  themes: all;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+/* Theme-aware rounding utility using DaisyUI's --radius-box variable */
+.radius-theme {
+  border-radius: var(--radius-box);
 }
 
 /* Hide scrollbar while maintaining scroll functionality */

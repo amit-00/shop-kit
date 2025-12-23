@@ -81,8 +81,8 @@ export default function FeaturedProducts({ products, name = 'Featured' }: Featur
   // Show skeleton UI while loading (products is undefined)
   if (products === undefined) {
     return (
-      <section className="min-h-[400px] bg-base-100 px-4 py-16 overflow-x-clip">
-        <div className="max-w-6xl mx-auto">
+      <section className="min-h-[400px] bg-base-100 py-16 overflow-x-clip">
+        <div className="max-w-7xl mx-auto px-8 md:px-4">
           <h2 className="text-4xl md:text-5xl font-bold text-base-content uppercase tracking-tight mb-12">
             {name}
           </h2>
@@ -104,8 +104,8 @@ export default function FeaturedProducts({ products, name = 'Featured' }: Featur
   }
 
   return (
-    <section className="min-h-[400px] bg-base-100 px-4 py-16 overflow-x-clip">
-      <div className="max-w-6xl mx-auto relative">
+    <section className="min-h-[400px] bg-base-100 py-16 overflow-x-clip">
+      <div className="max-w-7xl mx-auto px-8 md:px-4 relative">
         <h2 className="text-4xl md:text-5xl font-semibold text-base-content uppercase tracking-tight mb-12">
           {name}
         </h2>
@@ -118,23 +118,23 @@ export default function FeaturedProducts({ products, name = 'Featured' }: Featur
           }}
         >
           {products.map((product) => (
-            <div key={product.id} className="shrink-0 min-w-[280px]">
+            <div key={product.id} className="shrink-0 min-w-[300px]">
               <ProductItem product={product} />
             </div>
           ))}
         </div>
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 mt-4 justify-end">
           <button
             onClick={scrollLeft}
             disabled={!canScrollLeft}
-            className="btn btn-ghost btn-sm"
+            className="btn btn-ghost btn-md"
           >
             ←
           </button>
           <button
             onClick={scrollRight}
             disabled={!canScrollRight}
-            className="btn btn-ghost btn-sm"
+            className="btn btn-ghost btn-md"
           >
             →
           </button>

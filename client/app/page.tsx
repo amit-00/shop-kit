@@ -6,7 +6,7 @@ export default function Home() {
   
   return (
     <div className="">
-      <FeaturedProducts products={featuredProducts} name="Featured" />
+      Hello
     </div>
   );
 }

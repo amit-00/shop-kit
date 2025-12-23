@@ -2,8 +2,8 @@
 
 export default function Hero() {
   return (
-    <section className="min-h-[600px] bg-base-100 px-4 py-16">
-      <div className="max-w-6xl mx-auto">
+    <section className="min-h-[600px] bg-base-100  py-16">
+      <div className="max-w-7xl mx-auto px-8 md:px-4">
         <h1 className="text-6xl md:text-7xl lg:text-8xl mb-6 tracking-tight text-base-content">
           Curated for the<br />modern minimalist
         </h1>
