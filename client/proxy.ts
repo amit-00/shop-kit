@@ -12,11 +12,10 @@ export default function proxy(request: NextRequest) {
     }
 
     // For the root path on a subdomain, rewrite to the subdomain page
-    if (pathname === '/') {
-      const redirectUrl = new URL(`/s/${subdomain}`, request.url);
-      console.log('redirectUrl', redirectUrl);
-      return NextResponse.rewrite(redirectUrl);
-    }
+    const rewritePath = `/s/${subdomain}${pathname}`;
+    const redirectUrl = new URL(rewritePath, request.url);
+    console.log('redirectUrl', redirectUrl);
+    return NextResponse.rewrite(redirectUrl);
   }
 
   // On the root domain, allow normal access

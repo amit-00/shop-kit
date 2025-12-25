@@ -1,4 +1,6 @@
 import { ShopConfig } from "@/types/tenant";
+import { Product } from "@/types/product";
+import { mockCatalogs } from "./mockData";
 
 const shops: Record<string, ShopConfig> = {
   'minimal': {
@@ -20,6 +22,26 @@ const shops: Record<string, ShopConfig> = {
 
 export async function getShopConfig(subdomain: string): Promise<ShopConfig> {
   return Promise.resolve(shops[subdomain]);
+}
+
+export function getProductById(productId: string): Product | null {
+  // Search through all catalogs to find the product
+  for (const catalog of Object.values(mockCatalogs)) {
+    const product = catalog.products.find((p) => p.id === productId);
+    if (product) {
+      // Normalize product to match Product type (handle image vs images)
+      const normalizedProduct: Product = {
+        ...product,
+        images: 'images' in product && Array.isArray(product.images)
+          ? product.images
+          : 'image' in product && typeof product.image === 'string'
+          ? [product.image]
+          : [],
+      };
+      return normalizedProduct;
+    }
+  }
+  return null;
 }
 
 export const protocol =

@@ -1,8 +1,7 @@
 'use client';
 
-import { ProductProvider } from '../stores/productStore';
 import { CartProvider } from '../stores/cartStore';
-import ProductDetails from './ProductDetails';
+import { ProductPageProvider } from '../stores/productPageStore';
 
 export default function ShopPageClient({ 
   children, 
@@ -13,10 +12,9 @@ export default function ShopPageClient({
 }) {
   return (
     <CartProvider shopSlug={shopSlug}>
-      <ProductProvider>
-        {children}
-        <ProductDetails />
-      </ProductProvider>
+        <ProductPageProvider>
+          {children}
+        </ProductPageProvider>
     </CartProvider>
   );
 }

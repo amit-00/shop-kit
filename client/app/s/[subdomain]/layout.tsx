@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./shop.css";
 import { getShopConfig } from "@/lib/utils";
 import ShopPageClient from "@/components/ShopPageClient";
+import Cart from "@/components/Cart";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -22,6 +24,8 @@ export default async function RootLayout({
   return (
     <div lang="en" data-theme={config.theme} className="antialiased bg-base-100">
       <ShopPageClient shopSlug={config.name}>
+        <Cart />
+        <Header name={config.name} />
         {children}
       </ShopPageClient>
     </div>
