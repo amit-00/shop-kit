@@ -40,7 +40,7 @@ export default function ProductImageCarousel({ images, productName }: ProductIma
             <button
               key={index}
               onClick={() => setSelectedImageIndex(index)}
-              className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`relative w-20 h-20 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
                 selectedImageIndex === index
                   ? 'border-base-content'
                   : 'border-base-300 hover:border-base-content/50'
