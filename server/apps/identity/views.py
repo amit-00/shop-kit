@@ -1,5 +1,9 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -17,9 +21,18 @@ class UserViewSet(ViewSet):
 
     def create(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
+
         if serializer.is_valid():
-            serializer.save()
+            with transaction.atomic():
+                serializer.save()
+                Subscription.objects.create(
+                    user=serializer.instance,
+                    start_date=timezone.now(),
+                    end_date=timezone.now() + timedelta(days=365),
+                    tier=Subscription.Tier.FREE
+                )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
