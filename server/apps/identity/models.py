@@ -1,5 +1,5 @@
 from django.db import models
-from common.model_utils import TimestampedModel
+from ..common.model_utils import TimestampedModel
 
 
 class User(TimestampedModel):
