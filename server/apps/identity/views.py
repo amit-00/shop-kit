@@ -17,7 +17,28 @@ from .serializers import UserSerializer, SubscriptionSerializer
 class UserViewSet(ViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
+
+    def list(self, request: Request) -> Response:
+        email = request.query_params.get('email')
+        
+        if not email:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'error': 'Email is required'}
+            )
+
+        users = self.queryset.filter(email=email)
+
+        if not users.exists():
+            return Response(
+                status=status.HTTP_404_NOT_FOUND,
+                data={'error': 'User not found'}
+            )
+
+        serializer = self.serializer_class(users.first())
+        return Response(serializer.data)
+
 
     def create(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
@@ -32,23 +53,12 @@ class UserViewSet(ViewSet):
                     tier=Subscription.Tier.FREE
                 )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
     def retrieve(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)
-        serializer = self.serializer_class(user)
-        return Response(serializer.data)
-
-
-    @action(
-        detail=False,
-        methods=['get'],
-        url_path=r"by-email/(?P<email>[^/.]+)"
-    )
-    def by_email(self, request: Request, email: str) -> Response:
-        user = get_object_or_404(self.queryset, email=email)
         serializer = self.serializer_class(user)
         return Response(serializer.data)
 
