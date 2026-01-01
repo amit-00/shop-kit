@@ -1,18 +1,17 @@
 from datetime import timedelta
 
 from django.utils import timezone
-from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from rest_framework.decorators import action
-from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 
-from .models import User, Subscription
-from .serializers import UserSerializer, SubscriptionSerializer
+from .models import User, Plan
+from .serializers import UserSerializer, ChangePlanSerializer
 
 class UserViewSet(ViewSet):
     queryset = User.objects.all()
@@ -28,51 +27,84 @@ class UserViewSet(ViewSet):
                 data={'error': 'Email is required'}
             )
 
-        users = self.queryset.filter(email=email)
-
-        if not users.exists():
-            return Response(
-                status=status.HTTP_404_NOT_FOUND,
-                data={'error': 'User not found'}
-            )
-
-        serializer = self.serializer_class(users.first())
+        user = get_object_or_404(self.queryset, email=email)
+        serializer = self.serializer_class(user)
         return Response(serializer.data)
 
 
     def create(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
 
-        if serializer.is_valid():
-            with transaction.atomic():
-                serializer.save()
-                Subscription.objects.create(
-                    user=serializer.instance,
-                    start_date=timezone.now(),
-                    end_date=timezone.now() + timedelta(days=365),
-                    tier=Subscription.Tier.FREE
-                )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        plan = Plan.objects.get(code='free', is_active=True)
+        if not plan:
+            return Response(
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={'error': 'Free plan is not available'}
+            )
+
+        user = serializer.save(plan=plan)
+        user.plan_start_date = timezone.now()
+        user.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
     def retrieve(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)
+
         serializer = self.serializer_class(user)
         return Response(serializer.data)
 
+    
+    def partial_update(self, request: Request, pk: str) -> Response:
+        phone, first_name, last_name = request.data
 
-    def update(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)
-        serializer = self.serializer_class(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(
+            user, 
+            data={'phone': phone, 'first_name': first_name, 'last_name': last_name}, 
+            partial=True
+        )
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(serializer.data)
 
 
     def destroy(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)
+
         user.delete()
+        return Response(status=status.HTTP_204_OK)
+
+
+    @action(detail=True, methods=['post'], url_path='archive')
+    def archive(self, request: Request, pk: str) -> Response:
+        user = get_object_or_404(self.queryset, id=pk)
+        user.is_archived = True
+        user.archived_at = timezone.now()
+        user.archived_reason = request.data.get('archived_reason')
+        user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    
+    @action(detail=True, methods=['patch'], url_path='change-plan')
+    def change_plan(self, request: Request, pk: str) -> Response:
+        serializer = ChangePlanSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        plan = serializer.instance
+        duration = 30 if plan.interval == Plan.Interval.MONTH else 365
+
+        user = get_object_or_404(self.queryset, id=pk)
+        user.plan = plan
+        user.plan_start_date = timezone.now()
+        user.plan_end_date = user.plan_start_date + timedelta(days=duration)
+        user.payment_method = serializer.validated_data.get('payment_method')
+        user.save()
+        return Response(status=status.HTTP_204_OK)
