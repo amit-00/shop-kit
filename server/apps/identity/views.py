@@ -11,7 +11,7 @@ from rest_framework.request import Request
 from rest_framework import status
 
 from .models import User, Plan
-from .serializers import UserSerializer, ChangePlanSerializer
+from .serializers import ChangePlanSerializer, UserSerializer
 
 class UserViewSet(ViewSet):
     queryset = User.objects.all()
@@ -38,16 +38,7 @@ class UserViewSet(ViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        plan = Plan.objects.get(code='free', is_active=True)
-        if not plan:
-            return Response(
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data={'error': 'Free plan is not available'}
-            )
-
-        user = serializer.save(plan=plan)
-        user.plan_start_date = timezone.now()
-        user.save()
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -59,7 +50,9 @@ class UserViewSet(ViewSet):
 
     
     def partial_update(self, request: Request, pk: str) -> Response:
-        phone, first_name, last_name = request.data
+        phone = request.data.get('phone_number')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
 
         user = get_object_or_404(self.queryset, id=pk)
         serializer = self.serializer_class(
@@ -94,17 +87,11 @@ class UserViewSet(ViewSet):
     
     @action(detail=True, methods=['patch'], url_path='change-plan')
     def change_plan(self, request: Request, pk: str) -> Response:
-        serializer = ChangePlanSerializer(data=request.data)
+        user = get_object_or_404(self.queryset, id=pk)
+        serializer = ChangePlanSerializer(instance=user, data=request.data)
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        plan = serializer.instance
-        duration = 30 if plan.interval == Plan.Interval.MONTH else 365
-
-        user = get_object_or_404(self.queryset, id=pk)
-        user.plan = plan
-        user.plan_start_date = timezone.now()
-        user.plan_end_date = user.plan_start_date + timedelta(days=duration)
-        user.payment_method = serializer.validated_data.get('payment_method')
-        user.save()
-        return Response(status=status.HTTP_204_OK)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

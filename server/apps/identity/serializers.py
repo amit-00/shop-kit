@@ -1,27 +1,58 @@
+from datetime import timedelta
+
 from rest_framework import serializers
+from django.utils import timezone
 from .models import User, Plan
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'phone', 'first_name', 'last_name', 'is_active']
+        fields = [
+            'id', 
+            'email', 
+            'phone', 
+            'first_name', 
+            'last_name',
+            'plan',
+            'plan_start_date',
+            'plan_end_date',
+        ]
 
+    def create(self, validated_data: dict) -> User:
+        plan = Plan.objects.get(
+            code='free',
+            is_active=True
+        )
+
+        if not plan:
+            raise serializers.ValidationError('Free plan is not available')
+        
+        user = User.objects.create(
+            **validated_data,
+            plan=plan
+        )
+        user.plan_start_date = timezone.now()
+        user.save()
+        return user
+        
 
 class ChangePlanSerializer(serializers.Serializer):
-    plan_code = serializers.CharField(required=True)
-    payment_method = serializers.ChoiceField(required=True, choices=User.PaymentMethod.choices)
+    plan = serializers.PrimaryKeyRelatedField(
+        queryset=Plan.objects.filter(is_active=True), 
+        required=True
+    )
 
-    def validate_plan_code(self, value: str) -> str:
-        try:
-            plan = Plan.objects.get(code=value, is_active=True)
-        except Plan.DoesNotExist:
-            raise serializers.ValidationError('Invalid plan code')
+    class Meta:
+        model = User
+        fields = ['plan']
+
+    def update(self, instance: User, validated_data: dict) -> User:
+        plan = validated_data.get('plan')
+        duration = 30 if plan.interval == Plan.Interval.MONTH else 365
         
-        self.instance = plan
-        return value
-
-    def validate(self, attrs: dict) -> dict:
-        plan = self.instance
-        if plan.interval not in [Plan.Interval.MONTH, Plan.Interval.YEAR]:
-            raise serializers.ValidationError('Invalid plan interval')
-        return attrs
+        instance.plan = plan
+        instance.plan_start_date = timezone.now()
+        instance.plan_end_date = timezone.now() + timedelta(days=duration)
+        instance.save()
+        return instance
