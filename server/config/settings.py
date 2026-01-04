@@ -171,3 +171,5 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'identity.User'
+
+APPEND_SLASH = False

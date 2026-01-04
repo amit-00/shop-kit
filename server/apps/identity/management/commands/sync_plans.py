@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.db import transaction
 from django.conf import settings
 
-from ..models import Plan
+from apps.identity.models import Plan
 
 class Command(BaseCommand):
     help = 'Sync plans from plans.json'
