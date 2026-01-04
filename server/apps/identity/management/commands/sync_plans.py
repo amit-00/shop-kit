@@ -31,8 +31,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **opts) -> None:
-        default_path = Path(__file__).resolve().parents[1] / "plans.json"
-        path = opts.get('path', default_path)
+        default_path = Path(__file__).resolve().parents[2] / "plans.json"
+        path_arg = opts.get('path')
+        path = Path(path_arg) if path_arg else default_path
 
         if not path.exists():
             raise CommandError(f"File at {path} does not exist")
@@ -97,8 +98,8 @@ class Command(BaseCommand):
                 Plan.objects.bulk_update(to_update, fields=fields)
                 updates += len(to_update)
 
+            deletes = 0
             if extras:
                 deletes = Plan.objects.filter(code__in=[plan.code for plan in extras]).delete()[0]
-                deletes += len(extras)
 
             self.stdout.write(self.style.SUCCESS(f"Plans synced, Created {creates}, Updated {updates}, Deleted {deletes}"))
