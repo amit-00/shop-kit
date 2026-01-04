@@ -1,0 +1,50 @@
+[
+  {
+    "code": "free_usd",
+    "name": "Free",
+    "description": "Free plan",
+    "unit_amount": 0,
+    "currency": "USD",
+    "interval": "year"
+  },
+  {
+    "code": "free_cad",
+    "name": "Free",
+    "description": "Free plan",
+    "unit_amount": 0,
+    "currency": "CAD",
+    "interval": "year"
+  },
+  {
+    "code": "pro_usd_monthly",
+    "name": "Pro",
+    "description": "Pro plan",
+    "unit_amount": 500,
+    "currency": "USD",
+    "interval": "month"
+  },
+  {
+    "code": "pro_cad_monthly",
+    "name": "Pro",
+    "description": "Pro plan",
+    "unit_amount": 500,
+    "currency": "CAD",
+    "interval": "month"
+  },
+  {
+    "code": "pro_usd_yearly",
+    "name": "Pro",
+    "description": "Pro plan",
+    "unit_amount": 5500,
+    "currency": "USD",
+    "interval": "year"
+  },
+  {
+    "code": "pro_cad_yearly",
+    "name": "Pro",
+    "description": "Pro plan",
+    "unit_amount": 5500,
+    "currency": "CAD",
+    "interval": "year"
+  }
+]

@@ -1,15 +1,16 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 from ..common.model_utils import TimestampedModel
 
 
 class Plan(models.Model):
-    class Currency(models.choices):
+    class Currency(models.Choices):
         USD = "usd"
         CAD = "cad"
 
-    class Interval(models.choices):
+    class Interval(models.Choices):
         MONTH = "month"
         YEAR = "year"
 
@@ -31,7 +32,31 @@ class Plan(models.Model):
         ]
 
 
-class User(TimestampedModel):
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required')
+        
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_unusable_password()
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True')
+
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True')
+
+        return self.create_user(email, password=None, **extra_fields)
+
+
+class User(AbstractBaseUser, TimestampedModel):
     class PaymentMethod(models.TextChoices):
         STRIPE = 'stripe'
         CARD = 'card'
@@ -44,12 +69,28 @@ class User(TimestampedModel):
     plan_start_date = models.DateTimeField(null=True, blank=True)
     plan_end_date = models.DateTimeField(null=True, blank=True)
     payment_method = models.CharField(max_length=10, choices=PaymentMethod.choices, default=PaymentMethod.CARD)
-    is_archived = models.BooleanField(default=False)
-    archived_at = models.DateTimeField(null=True, blank=True)
-    archived_reason = models.TextField(null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
+    def set_password(self, password):
+        super().set_unusable_password()
+    
+    def check_password(self, password):
+        return False
+
+    def has_usable_password(self):
+        return False
+
 
     class Meta:
         indexes = [
-            models.Index(fields=['id', 'is_archived']),
-            models.Index(fields=['email', 'is_archived']),
+            models.Index(fields=['id']),
+            models.Index(fields=['email']),
         ]
