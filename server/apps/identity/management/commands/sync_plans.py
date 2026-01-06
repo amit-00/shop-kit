@@ -44,8 +44,8 @@ class Command(BaseCommand):
         if not isinstance(plans, list):
             raise CommandError(f"File at {path} is not a valid JSON array")
 
-        dry_run = opts.get('dry-run')
-        no_delete = opts.get('no-delete')
+        dry_run = opts.get('dry_run')
+        no_delete = opts.get('no_delete')
 
         desired_by_code = {plan['code']: plan for plan in plans}
         
@@ -57,7 +57,6 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             existing = {plan.code: plan for plan in Plan.objects.select_for_update().all()}
-
             to_create = []
             to_update = []
             creates = updates = 0
