@@ -7,7 +7,7 @@ from django.db import transaction
 from django.conf import settings
 
 from apps.identity.models import Plan
-from apps.identity.domain.plans import get_plan_updates
+from apps.identity.domain.plans import compute_plan_changes
 
 class Command(BaseCommand):
     help = 'Sync plans from plans.json'
@@ -58,8 +58,8 @@ class Command(BaseCommand):
         with transaction.atomic():
             existing = {plan.code: plan for plan in Plan.objects.select_for_update().all()}
             
-            to_create, to_update, to_delete = get_plan_updates(existing, desired_by_code, no_delete)
-            
+            to_create, to_update, to_delete = compute_plan_changes(existing, desired_by_code, no_delete)
+
             if dry_run:
                 self.stdout.write(f"[DRY RUN] Would create: {len(to_create)}")
                 self.stdout.write(f"[DRY RUN] Would update: {len(to_update)}")
@@ -68,15 +68,13 @@ class Command(BaseCommand):
             
             if to_create:
                 Plan.objects.bulk_create(to_create)
-                creates += len(to_create)
 
             if to_update:
                 fields = ['name', 'description', 'unit_amount', 'currency', 'interval', 'is_active']
                 Plan.objects.bulk_update(to_update, fields=fields)
-                updates += len(to_update)
 
             deletes = 0
             if to_delete:
                 deletes = Plan.objects.filter(code__in=[plan.code for plan in to_delete]).delete()[0]
 
-            self.stdout.write(self.style.SUCCESS(f"Plans synced, Created {creates}, Updated {updates}, Deleted {deletes}"))
+            self.stdout.write(self.style.SUCCESS(f"Plans synced, Created {len(to_create)}, Updated {len(to_update)}, Deleted {deletes}"))

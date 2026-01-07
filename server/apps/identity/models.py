@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 from datetime import timedelta
 
-from apps.identity.domain.plans import get_plan_duration
+from apps.identity.domain.utils import get_plan_duration
 
 from ..common.model_utils import TimestampedModel
 

@@ -1,17 +1,7 @@
-from datetime import timedelta
-from django.utils import timezone
 from ..models import Plan
 
-def get_plan_duration(interval: str) -> timedelta:
-    if interval == 'month':
-        return timedelta(days=30)
-    elif interval == 'year':
-        return timedelta(days=365)
-    else:
-        raise ValueError(f"Invalid interval: {interval}")
 
-
-def get_plan_updates(
+def compute_plan_changes(
     existing_plans: dict[str, Plan], 
     desired_plans: dict[str, dict], 
     no_delete: bool = False
@@ -24,7 +14,7 @@ def get_plan_updates(
 
     for code, payload in desired_plans.items():
         if code not in existing_plans:
-            to_create.append(Plan(code=code, **payload))
+            to_create.append(Plan(**payload))
         else:
             plan = existing_plans[code]
             changed = False
