@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 from datetime import timedelta
 
+from apps.identity.domain.plans import get_plan_duration
+
 from ..common.model_utils import TimestampedModel
 
 
@@ -58,13 +60,13 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password=None, **extra_fields)
 
     def update_subscription(self, user_id: str, plan: 'Plan') -> 'User':
-        duration = 30 if plan.interval == Plan.Interval.MONTH else 365
+        duration = get_plan_duration(plan.interval)
         
         user = self.get(pk=user_id)
 
         user.plan = plan
         user.plan_start_date = timezone.now()
-        user.plan_end_date = timezone.now() + timedelta(days=duration)
+        user.plan_end_date = user.plan_start_date + duration
         user.save(using=self._db)
         return user
 

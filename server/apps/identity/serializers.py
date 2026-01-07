@@ -55,7 +55,26 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
-        read_only_fields = '__all__'
+        read_only_fields = [
+            'id', 
+            'email', 
+            'phone', 
+            'first_name', 
+            'last_name',
+            'country',
+            'line1',
+            'line2',
+            'locality',
+            'administrative_area',
+            'postal_code',
+            'plan',
+            'plan_start_date',
+            'plan_end_date',
+            'payment_method',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
 
 
 class RegisterationSerializer(serializers.Serializer):

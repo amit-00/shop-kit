@@ -7,6 +7,7 @@ from django.db import transaction
 from django.conf import settings
 
 from apps.identity.models import Plan
+from apps.identity.domain.plans import get_plan_updates
 
 class Command(BaseCommand):
     help = 'Sync plans from plans.json'
@@ -56,35 +57,13 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             existing = {plan.code: plan for plan in Plan.objects.select_for_update().all()}
-            to_create = []
-            to_update = []
-            creates = updates = 0
-
-            for code, payload in desired_by_code.items():
-                if code not in existing:
-                    to_create.append(Plan(**payload))
-                else:
-                    plan = existing[code]
-                    changed = False
-                    for field, value in payload.items():
-                        if field == 'code':
-                            continue
-                        if getattr(plan, field) != value:
-                            setattr(plan, field, value)
-                            changed = True
-                    
-                    if changed:
-                        to_update.append(plan)
-
-            extras = []
-
-            if not no_delete:
-                extras = [plan for code, plan in existing.items() if code not in desired_by_code]
-
+            
+            to_create, to_update, to_delete = get_plan_updates(existing, desired_by_code, no_delete)
+            
             if dry_run:
                 self.stdout.write(f"[DRY RUN] Would create: {len(to_create)}")
                 self.stdout.write(f"[DRY RUN] Would update: {len(to_update)}")
-                self.stdout.write(f"[DRY RUN] Would delete: {len(extras)}")
+                self.stdout.write(f"[DRY RUN] Would delete: {len(to_delete)}")
                 return
             
             if to_create:
@@ -97,7 +76,7 @@ class Command(BaseCommand):
                 updates += len(to_update)
 
             deletes = 0
-            if extras:
-                deletes = Plan.objects.filter(code__in=[plan.code for plan in extras]).delete()[0]
+            if to_delete:
+                deletes = Plan.objects.filter(code__in=[plan.code for plan in to_delete]).delete()[0]
 
             self.stdout.write(self.style.SUCCESS(f"Plans synced, Created {creates}, Updated {updates}, Deleted {deletes}"))
