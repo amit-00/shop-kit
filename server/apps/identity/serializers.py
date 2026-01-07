@@ -5,6 +5,12 @@ from django.utils import timezone
 from .models import User, Plan
 
 
+class PlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = ['id', 'code', 'name', 'description', 'unit_amount', 'currency', 'interval', 'is_active']
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -14,28 +20,49 @@ class UserSerializer(serializers.ModelSerializer):
             'phone', 
             'first_name', 
             'last_name',
-            'plan',
-            'plan_start_date',
-            'plan_end_date',
         ]
 
     def create(self, validated_data: dict) -> User:
-        plan = Plan.objects.get(
-            code='free',
-            is_active=True
-        )
-
-        if not plan:
-            raise serializers.ValidationError('Free plan is not available')
-        
         user = User.objects.create(
-            **validated_data,
-            plan=plan
+            **validated_data
         )
-        user.plan_start_date = timezone.now()
         user.save()
         return user
-        
+
+
+class UserRetrieveSerializer(serializers.ModelSerializer):
+    plan = PlanSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 
+            'email', 
+            'phone', 
+            'first_name', 
+            'last_name',
+            'country',
+            'line1',
+            'line2',
+            'locality',
+            'administrative_area',
+            'postal_code',
+            'plan',
+            'plan_start_date',
+            'plan_end_date',
+            'payment_method',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = '__all__'
+
+
+class RegisterationSerializer(serializers.Serializer):
+    class Meta:
+        model = User
+        fields = ['country_code', 'payment_method']
+    
 
 class ChangePlanSerializer(serializers.Serializer):
     plan = serializers.PrimaryKeyRelatedField(
@@ -49,10 +76,4 @@ class ChangePlanSerializer(serializers.Serializer):
 
     def update(self, instance: User, validated_data: dict) -> User:
         plan = validated_data.get('plan')
-        duration = 30 if plan.interval == Plan.Interval.MONTH else 365
-        
-        instance.plan = plan
-        instance.plan_start_date = timezone.now()
-        instance.plan_end_date = timezone.now() + timedelta(days=duration)
-        instance.save()
-        return instance
+        return User.objects.update_subscription(instance.pk, plan)
