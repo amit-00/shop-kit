@@ -53,7 +53,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(
                 "Running in delete mode. Plans that are not in the JSON file will be deleted."
             ))
-            
 
         with transaction.atomic():
             existing = {plan.code: plan for plan in Plan.objects.select_for_update().all()}
