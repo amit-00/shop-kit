@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 
+from apps.identity.domain.utils import format_validation_errors
+
 from .models import User, Plan
 from .serializers import *
 
@@ -36,33 +38,50 @@ class UserViewSet(ViewSet):
         serializer = self.serializer_class(data=request.data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            formatted_errors = format_validation_errors(serializer.errors)
+            return Response({ 'errors': formatted_errors }, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
     def retrieve(self, request: Request, pk: str) -> Response:
-        user = get_object_or_404(self.queryset, id=pk)
+        # Validate the pk parameter using serializer
+        input_serializer = RetrieveUserSerializer(data={'pk': pk})
+        
+        if not input_serializer.is_valid():
+            formatted_errors = format_validation_errors(input_serializer.errors)
+            return Response({'errors': formatted_errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        validated_pk = input_serializer.validated_data['pk']
+        user = get_object_or_404(self.queryset, id=validated_pk)
 
         serializer = UserRetrieveSerializer(user)
         return Response(serializer.data)
 
     
     def partial_update(self, request: Request, pk: str) -> Response:
-        phone = request.data.get('phone_number')
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
-
         user = get_object_or_404(self.queryset, id=pk)
+        
+        # Map phone_number from request to phone for serializer
+        update_data = {}
+        if 'phone' in request.data:
+            update_data['phone'] = request.data['phone'] 
+        if 'first_name' in request.data:
+            update_data['first_name'] = request.data['first_name']
+        if 'last_name' in request.data:
+            update_data['last_name'] = request.data['last_name']
+
         serializer = self.serializer_class(
             user, 
-            data={'phone': phone, 'first_name': first_name, 'last_name': last_name}, 
+            data=update_data, 
             partial=True
         )
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            formatted_errors = format_validation_errors(serializer.errors)
+            print(formatted_errors)
+            return Response({ 'errors': formatted_errors }, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
         return Response(serializer.data)
@@ -78,9 +97,7 @@ class UserViewSet(ViewSet):
     @action(detail=True, methods=['post'], url_path='archive')
     def archive(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)
-        user.is_archived = True
-        user.archived_at = timezone.now()
-        user.archived_reason = request.data.get('archived_reason')
+        user.is_active = False
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

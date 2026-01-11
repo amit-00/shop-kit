@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from rest_framework import serializers
 from django.utils import timezone
+from rest_framework.validators import UniqueValidator
 from .models import User, Plan
 
 
@@ -12,6 +13,12 @@ class PlanSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all(), message='Email already exists')]
+    )
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+
     class Meta:
         model = User
         fields = [
@@ -20,6 +27,19 @@ class UserSerializer(serializers.ModelSerializer):
             'phone', 
             'first_name', 
             'last_name',
+            'country',
+            'line1',
+            'line2',
+            'locality',
+            'administrative_area',
+            'postal_code',
+            'plan',
+            'plan_start_date',
+            'plan_end_date',
+            'payment_method',
+            'is_active',
+            'created_at',
+            'updated_at',
         ]
 
     def create(self, validated_data: dict) -> User:
@@ -96,3 +116,14 @@ class ChangePlanSerializer(serializers.Serializer):
     def update(self, instance: User, validated_data: dict) -> User:
         plan = validated_data.get('plan')
         return User.objects.update_subscription(instance.pk, plan)
+
+
+class RetrieveUserSerializer(serializers.Serializer):
+    """Serializer to validate the pk parameter for retrieve method."""
+    pk = serializers.IntegerField(
+        required=True,
+        error_messages={
+            'required': 'User ID is required.',
+            'invalid': 'Invalid UUID format.',
+        }
+    )
