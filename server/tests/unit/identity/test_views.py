@@ -53,6 +53,8 @@ class UserViewSetTests(APITestCase):
             last_name="Doe"
         )
 
+        self.client.force_authenticate(user=self.user)
+
     # List Endpoint Tests
     def test_list_with_valid_email(self):
         """Test list endpoint with valid email returns user data."""

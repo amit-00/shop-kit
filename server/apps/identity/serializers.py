@@ -127,3 +127,29 @@ class RetrieveUserSerializer(serializers.Serializer):
             'invalid': 'Invalid UUID format.',
         }
     )
+
+
+class LoginRequestSerializer(serializers.Serializer):
+    """Serializer for requesting a magic link login."""
+    email = serializers.EmailField(required=True)
+
+
+class RegisterRequestSerializer(serializers.Serializer):
+    """Serializer for registering a new user."""
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all(), message='Email already exists')]
+    )
+    first_name = serializers.CharField(required=True, max_length=255)
+    last_name = serializers.CharField(required=True, max_length=255)
+
+
+class MagicLinkVerifySerializer(serializers.Serializer):
+    """Serializer for verifying magic link JTI token."""
+    jti = serializers.CharField(required=True, max_length=255)
+
+
+class TokenResponseSerializer(serializers.Serializer):
+    """Serializer for JWT token response."""
+    access = serializers.CharField()
+    refresh = serializers.CharField()

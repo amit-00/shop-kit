@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
@@ -18,7 +18,15 @@ from .serializers import *
 class UserViewSet(ViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """
+        Override to allow public access for list and create actions.
+        """
+        if self.action in ['list', 'create']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def list(self, request: Request) -> Response:
         email = request.query_params.get('email')
@@ -116,4 +124,4 @@ class UserViewSet(ViewSet):
 class PlanViewSet(ModelViewSet):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
