@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ShopViewSet, ProductViewSet, PriceViewSet
+from .views import PriceViewSet, ProductViewSet, ShopViewSet
 
 urlpatterns = [
     # Shop endpoints
