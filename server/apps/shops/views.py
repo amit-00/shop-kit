@@ -32,6 +32,12 @@ class ShopViewSet(ViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    def list(self, request: Request) -> Response:
+        user = request.user
+        shops = self.queryset.filter(user=user)
+        serializer = ShopResponseSerializer(shops, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def create(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
 

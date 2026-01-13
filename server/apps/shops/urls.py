@@ -3,7 +3,10 @@ from .views import ShopViewSet, ProductViewSet, PriceViewSet
 
 urlpatterns = [
     # Shop endpoints
-    path('', ShopViewSet.as_view({'post': 'create'}), name='shop-list'),
+    path('', ShopViewSet.as_view({
+        'get': 'list',
+        'post': 'create',
+    }), name='shop-list'),
     path('<str:identifier>', ShopViewSet.as_view({
         'get': 'retrieve',
         'put': 'update',
