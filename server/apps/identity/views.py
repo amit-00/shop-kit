@@ -15,6 +15,7 @@ from apps.identity.domain.utils import format_validation_errors
 from .models import User, Plan
 from .serializers import *
 
+
 class UserViewSet(ViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -41,7 +42,6 @@ class UserViewSet(ViewSet):
         serializer = UserRetrieveSerializer(user)
         return Response(serializer.data)
 
-
     def create(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
 
@@ -51,7 +51,6 @@ class UserViewSet(ViewSet):
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
     def retrieve(self, request: Request, pk: str) -> Response:
         # Validate the pk parameter using serializer
@@ -66,7 +65,6 @@ class UserViewSet(ViewSet):
 
         serializer = UserRetrieveSerializer(user)
         return Response(serializer.data)
-
     
     def partial_update(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)
@@ -94,13 +92,11 @@ class UserViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
 
-
     def destroy(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)
 
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
     @action(detail=True, methods=['post'], url_path='archive')
     def archive(self, request: Request, pk: str) -> Response:
@@ -109,7 +105,6 @@ class UserViewSet(ViewSet):
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    
     @action(detail=True, methods=['patch'], url_path='change-plan')
     def change_plan(self, request: Request, pk: str) -> Response:
         user = get_object_or_404(self.queryset, id=pk)

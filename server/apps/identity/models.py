@@ -26,7 +26,6 @@ class Plan(models.Model):
     interval = models.CharField(max_length=255, choices=Interval.choices, default=Interval.MONTH)
     is_active = models.BooleanField(default=True)
 
-
     def __str__(self):
         return self.code
 
@@ -109,7 +108,6 @@ class User(AbstractBaseUser, TimestampedModel):
 
     def has_usable_password(self):
         return False
-
 
     class Meta:
         indexes = [
