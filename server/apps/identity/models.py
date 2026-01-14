@@ -6,14 +6,10 @@ from datetime import timedelta
 
 from apps.identity.domain.utils import get_plan_duration
 
-from ..common.model_utils import TimestampedModel
+from ..common.model_utils import TimestampedModel, Currency
 
 
 class Plan(models.Model):
-    class Currency(models.Choices):
-        USD = "usd"
-        CAD = "cad"
-
     class Interval(models.Choices):
         MONTH = "month"
         YEAR = "year"

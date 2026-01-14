@@ -187,7 +187,7 @@ class SellerViewSetTests(APITestCase):
         seller_count_before = Seller.objects.count()
         response = self.client.post(url, data, format='json')
         
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Seller.objects.count(), seller_count_before)
 
     def test_create_without_authentication(self):

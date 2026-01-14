@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps.common.model_utils import TimestampedModel
+from apps.common.model_utils import TimestampedModel, Currency
 from apps.identity.models import User
 
 # Create your models here.
@@ -84,10 +84,6 @@ class Product(TimestampedModel):
 
 
 class Price(TimestampedModel):
-    class Currency(models.TextChoices):
-        USD = 'usd'
-        CAD = 'cad'
-
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='prices')
     amount = models.IntegerField()
     currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.USD)

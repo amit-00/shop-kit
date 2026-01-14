@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from apps.identity.models import User, Plan
+from apps.common.model_utils import Currency
 
 
 class UserViewSetTests(APITestCase):
@@ -30,7 +31,7 @@ class UserViewSetTests(APITestCase):
             name="Yearly Plan",
             description="Yearly subscription",
             unit_amount=10000,
-            currency=Plan.Currency.CAD,
+            currency=Currency.CAD,
             interval="year",
             is_active=True
         )

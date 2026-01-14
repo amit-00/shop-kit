@@ -5,6 +5,7 @@ from rest_framework import status
 
 from apps.identity.models import User
 from apps.sellers.models import Seller, Product, Price
+from apps.common.model_utils import Currency
 
 
 class PriceViewSetTests(APITestCase):
@@ -63,14 +64,14 @@ class PriceViewSetTests(APITestCase):
         self.price1 = Price.objects.create(
             product=self.product,
             amount=1000,
-            currency=Price.Currency.USD,
+            currency=Currency.USD,
             is_default=True
         )
         
         self.price2 = Price.objects.create(
             product=self.product,
             amount=1500,
-            currency=Price.Currency.CAD,
+            currency=Currency.CAD,
             is_default=False
         )
 
@@ -92,7 +93,7 @@ class PriceViewSetTests(APITestCase):
         Price.objects.create(
             product=self.other_product,
             amount=2000,
-            currency=Price.Currency.USD
+            currency=Currency.USD
         )
         
         url = reverse('price-list', kwargs={
@@ -147,7 +148,7 @@ class PriceViewSetTests(APITestCase):
         })
         data = {
             'amount': 2000,
-            'currency': Price.Currency.USD,
+            'currency': Currency.USD,
             'is_default': False
         }
         
@@ -172,7 +173,7 @@ class PriceViewSetTests(APITestCase):
         })
         data = {
             'amount': 3000,
-            'currency': Price.Currency.USD,
+            'currency': Currency.USD,
             'is_default': False
         }
         
@@ -216,7 +217,7 @@ class PriceViewSetTests(APITestCase):
         })
         data = {
             'amount': 2000,
-            'currency': Price.Currency.USD
+            'currency': Currency.USD
         }
         
         response = self.client.post(url, data, format='json')
@@ -231,7 +232,7 @@ class PriceViewSetTests(APITestCase):
         })
         data = {
             'amount': 2000,
-            'currency': Price.Currency.USD
+            'currency': Currency.USD
         }
         
         response = self.client.post(url, data, format='json')
@@ -292,7 +293,7 @@ class PriceViewSetTests(APITestCase):
         other_price = Price.objects.create(
             product=self.other_product,
             amount=2000,
-            currency=Price.Currency.USD
+            currency=Currency.USD
         )
         
         url = reverse('price-detail', kwargs={
@@ -402,7 +403,7 @@ class PriceViewSetTests(APITestCase):
         other_price = Price.objects.create(
             product=self.other_product,
             amount=2000,
-            currency=Price.Currency.USD
+            currency=Currency.USD
         )
         
         self.client.force_authenticate(user=self.user)
