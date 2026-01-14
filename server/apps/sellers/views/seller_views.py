@@ -33,8 +33,8 @@ class SellerViewSet(ViewSet):
         # Check if user already has a seller (OneToOneField constraint)
         if hasattr(request.user, 'seller'):
             return Response(
-                {'errors': 'User already has a seller. Use update endpoint to modify it.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {'errors': 'User is already a seller.'},
+                status=status.HTTP_403_FORBIDDEN
             )
 
         serializer = self.serializer_class(data=request.data)
