@@ -12,9 +12,6 @@ def compute_plan_changes(
     to_create = []
     to_update = []
 
-    print(f"DEBUG: existing_plans={existing_plans["plan_a"].unit_amount}")
-    print(f"DEBUG: desired_plans={desired_plans}")
-
     for code, payload in desired_plans.items():
         if code not in existing_plans:
             to_create.append(Plan(**payload))

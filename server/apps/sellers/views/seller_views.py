@@ -33,7 +33,7 @@ class SellerViewSet(ViewSet):
         # Check if user already has a seller (OneToOneField constraint)
         if hasattr(request.user, 'seller'):
             return Response(
-                {'detail': 'User already has a seller. Use update endpoint to modify it.'},
+                {'errors': 'User already has a seller. Use update endpoint to modify it.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

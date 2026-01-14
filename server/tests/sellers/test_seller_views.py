@@ -26,6 +26,13 @@ class SellerViewSetTests(APITestCase):
             first_name="Jane",
             last_name="Smith"
         )
+
+        self.user_without_seller = User.objects.create_user(
+            email="userwithoutseller@example.com",
+            phone="1111111111",
+            first_name="User",
+            last_name="Without Seller"
+        )
         
         # Create test sellers
         self.seller = Seller.objects.create(
@@ -151,7 +158,7 @@ class SellerViewSetTests(APITestCase):
 
     def test_create_with_missing_required_fields(self):
         """Test create endpoint with missing required fields returns 400."""
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.user_without_seller)
         url = reverse('seller-list')
         data = {
             'name': 'Incomplete Seller'
@@ -209,8 +216,8 @@ class SellerViewSetTests(APITestCase):
         response = self.client.post(url, data, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('detail', response.data)
-        self.assertIn('already has a seller', response.data['detail'].lower())
+        self.assertIn('errors', response.data)
+        self.assertIn('already has a seller', response.data['errors'].lower())
         
         # Verify no new seller was created
         self.assertEqual(Seller.objects.count(), seller_count_before)
