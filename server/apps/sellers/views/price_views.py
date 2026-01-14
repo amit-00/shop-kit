@@ -7,9 +7,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from apps.identity.domain.utils import format_validation_errors
-from ..models import Product, Price, Shop
+from ..models import Product, Price, Seller
 from ..serializers import PriceSerializer, PriceResponseSerializer
-from ..utils import get_shop, check_shop_owner
+from ..utils import get_seller, check_seller_owner
 
 
 class PriceViewSet(ViewSet):
@@ -25,21 +25,21 @@ class PriceViewSet(ViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
-    def _get_product(self, shop: Shop, product_id: str) -> Product:
+    def _get_product(self, seller: Seller, product_id: str) -> Product:
         """
-        Get product by ID, ensuring it belongs to the shop.
+        Get product by ID, ensuring it belongs to the seller.
         """
         try:
             product_id_int = int(product_id)
-            return get_object_or_404(Product.objects.filter(shop=shop), id=product_id_int)
+            return get_object_or_404(Product.objects.filter(seller=seller), id=product_id_int)
         except (ValueError, TypeError):
             raise Http404('Invalid product ID.')
 
     def list(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
         product_id = kwargs.get('product_id')
-        shop = get_shop(identifier)
-        product = self._get_product(shop, product_id)
+        seller = get_seller(identifier)
+        product = self._get_product(seller, product_id)
         prices = self.queryset.filter(product=product)
 
         serializer = PriceResponseSerializer(prices, many=True)
@@ -48,16 +48,16 @@ class PriceViewSet(ViewSet):
     def create(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
         product_id = kwargs.get('product_id')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
 
         # Check ownership
-        if not check_shop_owner(shop, request.user):
+        if not check_seller_owner(seller, request.user):
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        product = self._get_product(shop, product_id)
+        product = self._get_product(seller, product_id)
         serializer = self.serializer_class(data=request.data)
 
         if not serializer.is_valid():
@@ -72,8 +72,8 @@ class PriceViewSet(ViewSet):
         identifier = kwargs.get('identifier')
         product_id = kwargs.get('product_id')
         price_id = kwargs.get('price_id')
-        shop = get_shop(identifier)
-        product = self._get_product(shop, product_id)
+        seller = get_seller(identifier)
+        product = self._get_product(seller, product_id)
 
         try:
             price_id_int = int(price_id)
@@ -91,16 +91,16 @@ class PriceViewSet(ViewSet):
         identifier = kwargs.get('identifier')
         product_id = kwargs.get('product_id')
         price_id = kwargs.get('price_id')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
 
         # Check ownership
-        if not check_shop_owner(shop, request.user):
+        if not check_seller_owner(seller, request.user):
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        product = self._get_product(shop, product_id)
+        product = self._get_product(seller, product_id)
 
         try:
             price_id_int = int(price_id)

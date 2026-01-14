@@ -4,7 +4,7 @@ from apps.common.model_utils import TimestampedModel
 from apps.identity.models import User
 
 # Create your models here.
-class Shop(TimestampedModel):
+class Seller(TimestampedModel):
     class Theme(models.TextChoices):
         LIGHT = 'light'
         DARK = 'dark'
@@ -42,7 +42,7 @@ class Shop(TimestampedModel):
         ABYSS = 'abyss'
         SILK = 'silk'
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shops')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='seller')
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(null=True, blank=True)
@@ -65,7 +65,7 @@ class Shop(TimestampedModel):
 
 
 class Product(TimestampedModel):
-    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     sku = models.CharField(max_length=255, null=True, blank=True)
@@ -79,7 +79,7 @@ class Product(TimestampedModel):
 
     class Meta:
         indexes = [
-            models.Index(fields=['shop']),
+            models.Index(fields=['seller']),
         ]
 
 

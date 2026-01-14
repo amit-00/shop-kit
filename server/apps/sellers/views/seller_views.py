@@ -5,14 +5,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from apps.identity.domain.utils import format_validation_errors
-from ..models import Shop
-from ..serializers import ShopSerializer, ShopResponseSerializer
-from ..utils import get_shop, check_shop_owner
+from ..models import Seller
+from ..serializers import SellerSerializer, SellerResponseSerializer
+from ..utils import get_seller, check_seller_owner
 
 
-class ShopViewSet(ViewSet):
-    queryset = Shop.objects.all()
-    serializer_class = ShopSerializer
+class SellerViewSet(ViewSet):
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
@@ -25,11 +25,18 @@ class ShopViewSet(ViewSet):
 
     def list(self, request: Request) -> Response:
         user = request.user
-        shops = self.queryset.filter(user=user)
-        serializer = ShopResponseSerializer(shops, many=True)
+        sellers = self.queryset.filter(user=user)
+        serializer = SellerResponseSerializer(sellers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request: Request) -> Response:
+        # Check if user already has a seller (OneToOneField constraint)
+        if hasattr(request.user, 'seller'):
+            return Response(
+                {'detail': 'User already has a seller. Use update endpoint to modify it.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer = self.serializer_class(data=request.data)
 
         if not serializer.is_valid():
@@ -38,47 +45,47 @@ class ShopViewSet(ViewSet):
 
         # Set user from request
         serializer.save(user=request.user)
-        response_serializer = ShopResponseSerializer(serializer.instance)
+        response_serializer = SellerResponseSerializer(serializer.instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
-        shop = get_shop(identifier)
-        serializer = ShopResponseSerializer(shop)
+        seller = get_seller(identifier)
+        serializer = SellerResponseSerializer(seller)
         return Response(serializer.data)
 
     def update(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
 
         # Check ownership
-        if not check_shop_owner(shop, request.user):
+        if not check_seller_owner(seller, request.user):
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        serializer = self.serializer_class(shop, data=request.data)
+        serializer = self.serializer_class(seller, data=request.data)
 
         if not serializer.is_valid():
             formatted_errors = format_validation_errors(serializer.errors)
             return Response({'errors': formatted_errors}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
-        response_serializer = ShopResponseSerializer(serializer.instance)
+        response_serializer = SellerResponseSerializer(serializer.instance)
         return Response(response_serializer.data)
 
     def destroy(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
 
         # Check ownership
-        if not check_shop_owner(shop, request.user):
+        if not check_seller_owner(seller, request.user):
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        shop.delete()
+        seller.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

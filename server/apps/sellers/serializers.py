@@ -1,15 +1,15 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from .models import Shop, Product, Price
+from .models import Seller, Product, Price
 
 
-class ShopSerializer(serializers.ModelSerializer):
+class SellerSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(
-        validators=[UniqueValidator(queryset=Shop.objects.all(), message='Slug already exists')]
+        validators=[UniqueValidator(queryset=Seller.objects.all(), message='Slug already exists')]
     )
 
     class Meta:
-        model = Shop
+        model = Seller
         fields = [
             'id',
             'name',
@@ -33,9 +33,9 @@ class ShopSerializer(serializers.ModelSerializer):
         }
 
 
-class ShopResponseSerializer(serializers.ModelSerializer):
+class SellerResponseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Shop
+        model = Seller
         fields = [
             'id',
             'name',

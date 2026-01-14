@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from apps.identity.models import User
-from apps.shops.models import Shop, Product
+from apps.sellers.models import Seller, Product
 
 
 class ProductViewSetTests(APITestCase):
@@ -27,24 +27,24 @@ class ProductViewSetTests(APITestCase):
             last_name="Smith"
         )
         
-        # Create test shops
-        self.shop = Shop.objects.create(
+        # Create test sellers
+        self.seller = Seller.objects.create(
             user=self.user,
-            name="My Shop",
-            slug="my-shop",
-            support_email="support@myshop.com"
+            name="My Seller",
+            slug="my-seller",
+            support_email="support@myseller.com"
         )
         
-        self.other_shop = Shop.objects.create(
+        self.other_seller = Seller.objects.create(
             user=self.other_user,
-            name="Other Shop",
-            slug="other-shop",
-            support_email="support@othershop.com"
+            name="Other Seller",
+            slug="other-seller",
+            support_email="support@otherseller.com"
         )
         
         # Create test products
         self.product1 = Product.objects.create(
-            shop=self.shop,
+            seller=self.seller,
             name="Product One",
             description="First product",
             sku="PROD-001",
@@ -53,7 +53,7 @@ class ProductViewSetTests(APITestCase):
         )
         
         self.product2 = Product.objects.create(
-            shop=self.shop,
+            seller=self.seller,
             name="Product Two",
             description="Second product",
             sku="PROD-002",
@@ -62,7 +62,7 @@ class ProductViewSetTests(APITestCase):
         )
         
         self.product3 = Product.objects.create(
-            shop=self.shop,
+            seller=self.seller,
             name="Another Product",
             description="Third product",
             sku="PROD-003",
@@ -73,7 +73,7 @@ class ProductViewSetTests(APITestCase):
     # List Endpoint Tests
     def test_list_without_authentication(self):
         """Test list endpoint allows public access."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -81,7 +81,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_filters_by_name(self):
         """Test list endpoint filters products by name."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'name': 'Product One'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -90,7 +90,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_filters_by_sku(self):
         """Test list endpoint filters products by SKU."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'sku': 'PROD-002'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -99,7 +99,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_filters_by_is_published_true(self):
         """Test list endpoint filters products by is_published=True."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'is_published': 'true'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -109,7 +109,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_filters_by_is_published_false(self):
         """Test list endpoint filters products by is_published=False."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'is_published': 'false'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -118,7 +118,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_sorts_by_name_asc(self):
         """Test list endpoint sorts products by name ascending."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'sort': 'name', 'order': 'asc'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -127,7 +127,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_sorts_by_name_desc(self):
         """Test list endpoint sorts products by name descending."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'sort': 'name', 'order': 'desc'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -136,7 +136,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_sorts_by_created_at_desc(self):
         """Test list endpoint sorts products by created_at descending by default."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -146,7 +146,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_applies_limit(self):
         """Test list endpoint applies limit to results."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'limit': '2'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -154,35 +154,35 @@ class ProductViewSetTests(APITestCase):
 
     def test_list_with_invalid_sort_field(self):
         """Test list endpoint defaults to created_at for invalid sort field."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url, {'sort': 'invalid_field'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should still return results sorted by created_at
 
-    def test_list_returns_only_shop_products(self):
-        """Test list endpoint returns only products for the specified shop."""
-        # Create product in other shop
+    def test_list_returns_only_seller_products(self):
+        """Test list endpoint returns only products for the specified seller."""
+        # Create product in other seller
         Product.objects.create(
-            shop=self.other_shop,
-            name="Other Shop Product",
-            description="Product in other shop",
+            seller=self.other_seller,
+            name="Other Seller Product",
+            description="Product in other seller",
             sku="OTHER-001"
         )
         
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for product in response.data:
             product_obj = Product.objects.get(id=product['id'])
-            self.assertEqual(product_obj.shop, self.shop)
+            self.assertEqual(product_obj.seller, self.seller)
 
     # Create Endpoint Tests
     def test_create_with_valid_data(self):
         """Test create endpoint with valid data creates product."""
         self.client.force_authenticate(user=self.user)
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         data = {
             'name': 'New Product',
             'description': 'A new product',
@@ -201,12 +201,12 @@ class ProductViewSetTests(APITestCase):
         # Verify database side effects
         self.assertEqual(Product.objects.count(), product_count_before + 1)
         product = Product.objects.get(sku=data['sku'])
-        self.assertEqual(product.shop, self.shop)
+        self.assertEqual(product.seller, self.seller)
 
     def test_create_with_ownership_check(self):
         """Test create endpoint checks ownership and returns 403 for non-owner."""
         self.client.force_authenticate(user=self.other_user)
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         data = {
             'name': 'Hacked Product',
             'description': 'Unauthorized product',
@@ -230,7 +230,7 @@ class ProductViewSetTests(APITestCase):
     def test_create_with_missing_required_fields(self):
         """Test create endpoint with missing required fields returns 400."""
         self.client.force_authenticate(user=self.user)
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         data = {
             'name': 'Incomplete Product'
             # Missing description and sku
@@ -245,7 +245,7 @@ class ProductViewSetTests(APITestCase):
 
     def test_create_without_authentication(self):
         """Test create endpoint requires authentication."""
-        url = reverse('product-list', kwargs={'identifier': self.shop.slug})
+        url = reverse('product-list', kwargs={'identifier': self.seller.slug})
         data = {
             'name': 'New Product',
             'description': 'A new product',
@@ -260,7 +260,7 @@ class ProductViewSetTests(APITestCase):
     def test_retrieve_with_valid_product_id(self):
         """Test retrieve endpoint with valid product ID."""
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         response = self.client.get(url)
@@ -272,7 +272,7 @@ class ProductViewSetTests(APITestCase):
     def test_retrieve_without_authentication(self):
         """Test retrieve endpoint allows public access."""
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         response = self.client.get(url)
@@ -282,7 +282,7 @@ class ProductViewSetTests(APITestCase):
     def test_retrieve_with_invalid_product_id_format(self):
         """Test retrieve endpoint with invalid product ID format returns 400."""
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': 'invalid-id'
         })
         response = self.client.get(url)
@@ -294,24 +294,24 @@ class ProductViewSetTests(APITestCase):
     def test_retrieve_with_nonexistent_product(self):
         """Test retrieve endpoint with non-existent product returns 404."""
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': '99999'
         })
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_retrieve_with_product_from_different_shop(self):
-        """Test retrieve endpoint returns 404 for product from different shop."""
+    def test_retrieve_with_product_from_different_seller(self):
+        """Test retrieve endpoint returns 404 for product from different seller."""
         other_product = Product.objects.create(
-            shop=self.other_shop,
-            name="Other Shop Product",
-            description="Product in other shop",
+            seller=self.other_seller,
+            name="Other Seller Product",
+            description="Product in other seller",
             sku="OTHER-001"
         )
         
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(other_product.id)
         })
         response = self.client.get(url)
@@ -323,7 +323,7 @@ class ProductViewSetTests(APITestCase):
         """Test update endpoint with valid data updates product."""
         self.client.force_authenticate(user=self.user)
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         data = {
@@ -351,7 +351,7 @@ class ProductViewSetTests(APITestCase):
         """Test update endpoint checks ownership and returns 403 for non-owner."""
         self.client.force_authenticate(user=self.other_user)
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         data = {
@@ -374,7 +374,7 @@ class ProductViewSetTests(APITestCase):
         """Test update endpoint with invalid product ID format returns 400."""
         self.client.force_authenticate(user=self.user)
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': 'invalid-id'
         })
         data = {
@@ -394,7 +394,7 @@ class ProductViewSetTests(APITestCase):
         """Test update endpoint with validation errors returns 400."""
         self.client.force_authenticate(user=self.user)
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         data = {
@@ -412,7 +412,7 @@ class ProductViewSetTests(APITestCase):
     def test_update_without_authentication(self):
         """Test update endpoint requires authentication."""
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         data = {
@@ -430,7 +430,7 @@ class ProductViewSetTests(APITestCase):
         """Test destroy endpoint with valid product deletes product."""
         self.client.force_authenticate(user=self.user)
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         product_id = self.product1.id
@@ -449,7 +449,7 @@ class ProductViewSetTests(APITestCase):
         """Test destroy endpoint checks ownership and returns 403 for non-owner."""
         self.client.force_authenticate(user=self.other_user)
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         
@@ -467,7 +467,7 @@ class ProductViewSetTests(APITestCase):
         """Test destroy endpoint with invalid product ID format returns 400."""
         self.client.force_authenticate(user=self.user)
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': 'invalid-id'
         })
         
@@ -480,7 +480,7 @@ class ProductViewSetTests(APITestCase):
     def test_destroy_without_authentication(self):
         """Test destroy endpoint requires authentication."""
         url = reverse('product-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product1.id)
         })
         

@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from apps.identity.models import User
-from apps.shops.models import Shop, Product, Price
+from apps.sellers.models import Seller, Product, Price
 
 
 class PriceViewSetTests(APITestCase):
@@ -27,24 +27,24 @@ class PriceViewSetTests(APITestCase):
             last_name="Smith"
         )
         
-        # Create test shops
-        self.shop = Shop.objects.create(
+        # Create test sellers
+        self.seller = Seller.objects.create(
             user=self.user,
-            name="My Shop",
-            slug="my-shop",
-            support_email="support@myshop.com"
+            name="My Seller",
+            slug="my-seller",
+            support_email="support@myseller.com"
         )
         
-        self.other_shop = Shop.objects.create(
+        self.other_seller = Seller.objects.create(
             user=self.other_user,
-            name="Other Shop",
-            slug="other-shop",
-            support_email="support@othershop.com"
+            name="Other Seller",
+            slug="other-seller",
+            support_email="support@otherseller.com"
         )
         
         # Create test products
         self.product = Product.objects.create(
-            shop=self.shop,
+            seller=self.seller,
             name="Test Product",
             description="A test product",
             sku="TEST-001",
@@ -52,9 +52,9 @@ class PriceViewSetTests(APITestCase):
         )
         
         self.other_product = Product.objects.create(
-            shop=self.other_shop,
+            seller=self.other_seller,
             name="Other Product",
-            description="Product in other shop",
+            description="Product in other seller",
             sku="OTHER-001",
             stock=5
         )
@@ -78,7 +78,7 @@ class PriceViewSetTests(APITestCase):
     def test_list_without_authentication(self):
         """Test list endpoint allows public access."""
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id)
         })
         response = self.client.get(url)
@@ -96,7 +96,7 @@ class PriceViewSetTests(APITestCase):
         )
         
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id)
         })
         response = self.client.get(url)
@@ -110,7 +110,7 @@ class PriceViewSetTests(APITestCase):
     def test_list_with_invalid_product_id_format(self):
         """Test list endpoint with invalid product ID format raises 404."""
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': 'invalid-id'
         })
         response = self.client.get(url)
@@ -120,17 +120,17 @@ class PriceViewSetTests(APITestCase):
     def test_list_with_nonexistent_product(self):
         """Test list endpoint with non-existent product returns 404."""
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': '99999'
         })
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_list_with_product_from_different_shop(self):
-        """Test list endpoint returns 404 for product from different shop."""
+    def test_list_with_product_from_different_seller(self):
+        """Test list endpoint returns 404 for product from different seller."""
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.other_product.id)
         })
         response = self.client.get(url)
@@ -142,7 +142,7 @@ class PriceViewSetTests(APITestCase):
         """Test create endpoint with valid data creates price."""
         self.client.force_authenticate(user=self.user)
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id)
         })
         data = {
@@ -167,7 +167,7 @@ class PriceViewSetTests(APITestCase):
         """Test create endpoint checks ownership and returns 403 for non-owner."""
         self.client.force_authenticate(user=self.other_user)
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id)
         })
         data = {
@@ -193,7 +193,7 @@ class PriceViewSetTests(APITestCase):
         """Test create endpoint with missing required fields returns 400."""
         self.client.force_authenticate(user=self.user)
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id)
         })
         data = {
@@ -211,7 +211,7 @@ class PriceViewSetTests(APITestCase):
     def test_create_without_authentication(self):
         """Test create endpoint requires authentication."""
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id)
         })
         data = {
@@ -226,7 +226,7 @@ class PriceViewSetTests(APITestCase):
         """Test create endpoint with invalid product ID format raises 404."""
         self.client.force_authenticate(user=self.user)
         url = reverse('price-list', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': 'invalid-id'
         })
         data = {
@@ -241,7 +241,7 @@ class PriceViewSetTests(APITestCase):
     def test_retrieve_with_valid_price_id(self):
         """Test retrieve endpoint with valid price ID."""
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': str(self.price1.id)
         })
@@ -255,7 +255,7 @@ class PriceViewSetTests(APITestCase):
     def test_retrieve_without_authentication(self):
         """Test retrieve endpoint allows public access."""
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': str(self.price1.id)
         })
@@ -266,7 +266,7 @@ class PriceViewSetTests(APITestCase):
     def test_retrieve_with_invalid_price_id_format(self):
         """Test retrieve endpoint with invalid price ID format returns 400."""
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': 'invalid-id'
         })
@@ -279,7 +279,7 @@ class PriceViewSetTests(APITestCase):
     def test_retrieve_with_nonexistent_price(self):
         """Test retrieve endpoint with non-existent price returns 404."""
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': '99999'
         })
@@ -296,7 +296,7 @@ class PriceViewSetTests(APITestCase):
         )
         
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': str(other_price.id)
         })
@@ -307,7 +307,7 @@ class PriceViewSetTests(APITestCase):
     def test_retrieve_with_invalid_product_id_format(self):
         """Test retrieve endpoint with invalid product ID format raises 404."""
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': 'invalid-id',
             'price_id': str(self.price1.id)
         })
@@ -320,7 +320,7 @@ class PriceViewSetTests(APITestCase):
         """Test destroy endpoint with valid price deletes price."""
         self.client.force_authenticate(user=self.user)
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': str(self.price1.id)
         })
@@ -340,7 +340,7 @@ class PriceViewSetTests(APITestCase):
         """Test destroy endpoint checks ownership and returns 403 for non-owner."""
         self.client.force_authenticate(user=self.other_user)
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': str(self.price1.id)
         })
@@ -363,7 +363,7 @@ class PriceViewSetTests(APITestCase):
         """Test destroy endpoint with invalid price ID format returns 400."""
         self.client.force_authenticate(user=self.user)
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': 'invalid-id'
         })
@@ -377,7 +377,7 @@ class PriceViewSetTests(APITestCase):
     def test_destroy_without_authentication(self):
         """Test destroy endpoint requires authentication."""
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': str(self.price1.id)
         })
@@ -389,7 +389,7 @@ class PriceViewSetTests(APITestCase):
         """Test destroy endpoint with invalid product ID format raises 404."""
         self.client.force_authenticate(user=self.user)
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': 'invalid-id',
             'price_id': str(self.price1.id)
         })
@@ -407,7 +407,7 @@ class PriceViewSetTests(APITestCase):
         
         self.client.force_authenticate(user=self.user)
         url = reverse('price-detail', kwargs={
-            'identifier': self.shop.slug,
+            'identifier': self.seller.slug,
             'product_id': str(self.product.id),
             'price_id': str(other_price.id)
         })

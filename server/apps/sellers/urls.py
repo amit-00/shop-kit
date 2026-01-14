@@ -1,19 +1,19 @@
 from django.urls import path
-from .views import PriceViewSet, ProductViewSet, ShopViewSet
+from .views import PriceViewSet, ProductViewSet, SellerViewSet
 
 urlpatterns = [
-    # Shop endpoints
-    path('', ShopViewSet.as_view({
+    # Seller endpoints
+    path('', SellerViewSet.as_view({
         'get': 'list',
         'post': 'create',
-    }), name='shop-list'),
-    path('<str:identifier>', ShopViewSet.as_view({
+    }), name='seller-list'),
+    path('<str:identifier>', SellerViewSet.as_view({
         'get': 'retrieve',
         'put': 'update',
         'delete': 'destroy',
-    }), name='shop-detail'),
+    }), name='seller-detail'),
     
-    # Product endpoints (nested under shop)
+    # Product endpoints (nested under seller)
     path('<str:identifier>/products', ProductViewSet.as_view({
         'get': 'list',
         'post': 'create',
@@ -24,7 +24,7 @@ urlpatterns = [
         'delete': 'destroy',
     }), name='product-detail'),
     
-    # Price endpoints (nested under shop and product)
+    # Price endpoints (nested under seller and product)
     path('<str:identifier>/products/<str:product_id>/prices', PriceViewSet.as_view({
         'get': 'list',
         'post': 'create',

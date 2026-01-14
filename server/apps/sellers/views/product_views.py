@@ -8,7 +8,7 @@ from rest_framework.viewsets import ViewSet
 from apps.identity.domain.utils import format_validation_errors
 from ..models import Product
 from ..serializers import ProductSerializer, ProductResponseSerializer
-from ..utils import get_shop, check_shop_owner
+from ..utils import get_seller, check_seller_owner
 
 
 class ProductViewSet(ViewSet):
@@ -26,10 +26,10 @@ class ProductViewSet(ViewSet):
 
     def create(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
 
         # Check ownership
-        if not check_shop_owner(shop, request.user):
+        if not check_seller_owner(seller, request.user):
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -41,14 +41,14 @@ class ProductViewSet(ViewSet):
             formatted_errors = format_validation_errors(serializer.errors)
             return Response({'errors': formatted_errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer.save(shop=shop)
+        serializer.save(seller=seller)
         response_serializer = ProductResponseSerializer(serializer.instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def list(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
-        shop = get_shop(identifier)
-        products = self.queryset.filter(shop=shop)
+        seller = get_seller(identifier)
+        products = self.queryset.filter(seller=seller)
 
         # Apply filters
         name = request.query_params.get('name')
@@ -94,10 +94,10 @@ class ProductViewSet(ViewSet):
     def retrieve(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
         product_id = kwargs.get('product_id')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
         try:
             product_id_int = int(product_id)
-            product = get_object_or_404(self.queryset, id=product_id_int, shop=shop)
+            product = get_object_or_404(self.queryset, id=product_id_int, seller=seller)
         except (ValueError, TypeError):
             return Response(
                 {'detail': 'Invalid product ID.'},
@@ -110,10 +110,10 @@ class ProductViewSet(ViewSet):
     def update(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
         product_id = kwargs.get('product_id')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
 
         # Check ownership
-        if not check_shop_owner(shop, request.user):
+        if not check_seller_owner(seller, request.user):
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -121,7 +121,7 @@ class ProductViewSet(ViewSet):
 
         try:
             product_id_int = int(product_id)
-            product = get_object_or_404(self.queryset, id=product_id_int, shop=shop)
+            product = get_object_or_404(self.queryset, id=product_id_int, seller=seller)
         except (ValueError, TypeError):
             return Response(
                 {'detail': 'Invalid product ID.'},
@@ -141,10 +141,10 @@ class ProductViewSet(ViewSet):
     def destroy(self, request: Request, **kwargs) -> Response:
         identifier = kwargs.get('identifier')
         product_id = kwargs.get('product_id')
-        shop = get_shop(identifier)
+        seller = get_seller(identifier)
 
         # Check ownership
-        if not check_shop_owner(shop, request.user):
+        if not check_seller_owner(seller, request.user):
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -152,7 +152,7 @@ class ProductViewSet(ViewSet):
 
         try:
             product_id_int = int(product_id)
-            product = get_object_or_404(self.queryset, id=product_id_int, shop=shop)
+            product = get_object_or_404(self.queryset, id=product_id_int, seller=seller)
         except (ValueError, TypeError):
             return Response(
                 {'detail': 'Invalid product ID.'},
