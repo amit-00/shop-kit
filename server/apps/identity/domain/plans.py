@@ -19,12 +19,9 @@ def compute_plan_changes(
             plan = existing_plans[code]
             changed = False
             for field, value in payload.items():
-                print(f"DEBUG: field={field}, value={value}")
-                print(f"DEBUG: current value={plan.__dict__.get(field)}")
                 if field == 'code':
                     continue
                 if getattr(plan, field) != value:
-                    print(f"DEBUG: Change detected for {field}, changed={changed}")
                     setattr(plan, field, value)
                     changed = True
             
