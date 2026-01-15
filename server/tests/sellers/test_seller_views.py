@@ -50,53 +50,6 @@ class SellerViewSetTests(APITestCase):
             support_email="support@otherseller.com"
         )
 
-    # List Endpoint Tests
-    def test_list_with_authenticated_user(self):
-        """Test list endpoint returns only user's sellers."""
-        self.client.force_authenticate(user=self.user)
-        url = reverse('seller-list')
-        response = self.client.get(url)
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['slug'], self.seller.slug)
-        self.assertEqual(response.data[0]['name'], self.seller.name)
-
-    def test_list_without_authentication(self):
-        """Test list endpoint requires authentication."""
-        url = reverse('seller-list')
-        response = self.client.get(url)
-        
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_list_returns_empty_when_user_has_no_seller(self):
-        """Test list endpoint returns empty list when user has no seller."""
-        # Create a user without a seller
-        user_without_seller = User.objects.create_user(
-            email="noseller@example.com",
-            phone="7777777777",
-            first_name="No",
-            last_name="Seller"
-        )
-        
-        self.client.force_authenticate(user=user_without_seller)
-        url = reverse('seller-list')
-        response = self.client.get(url)
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)
-
-    def test_list_excludes_other_users_sellers(self):
-        """Test list endpoint excludes sellers from other users."""
-        self.client.force_authenticate(user=self.user)
-        url = reverse('seller-list')
-        response = self.client.get(url)
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        seller_slugs = [seller['slug'] for seller in response.data]
-        self.assertIn(self.seller.slug, seller_slugs)
-        self.assertNotIn(self.other_seller.slug, seller_slugs)
-
     # Create Endpoint Tests
     def test_create_with_valid_data(self):
         """Test create endpoint with valid data creates seller for user without seller."""

@@ -23,12 +23,6 @@ class SellerViewSet(ViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
-    def list(self, request: Request) -> Response:
-        user = request.user
-        sellers = self.queryset.filter(user=user)
-        serializer = SellerResponseSerializer(sellers, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
     def create(self, request: Request) -> Response:
         # Check if user already has a seller (OneToOneField constraint)
         if hasattr(request.user, 'seller'):

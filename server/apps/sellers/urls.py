@@ -4,7 +4,6 @@ from .views import PriceViewSet, ProductViewSet, SellerViewSet
 urlpatterns = [
     # Seller endpoints
     path('', SellerViewSet.as_view({
-        'get': 'list',
         'post': 'create',
     }), name='seller-list'),
     path('<str:identifier>', SellerViewSet.as_view({
